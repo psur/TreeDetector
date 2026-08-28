@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Install matching torch/torchvision builds first; see README.md.
+# Detectron2 is installed separately from its official source repository because
+# wheel availability depends on the Python, PyTorch, CUDA, and OS combination.

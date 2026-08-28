@@ -1,0 +1,80 @@
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local Python and Conda environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+conda-env/
+*.conda/
+
+# Packaging and build output
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+config/config.yaml
+
+# Prepared datasets and generated benchmark artifacts
+datasets/**
+!datasets/.gitkeep
+runs/**
+!runs/.gitkeep
+results/**
+!results/.gitkeep
+predictions/
+outputs/
+output/
+artifacts/
+
+# Model checkpoints and exported models
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.weights
+*.engine
+*.tflite
+
+# Generated logs, temporary files, and editor backups
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+~$*
+
+# IDE and OS metadata
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.DS_Store
+Thumbs.db
+Desktop.ini

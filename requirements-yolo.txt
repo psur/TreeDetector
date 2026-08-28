@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Install the appropriate PyTorch build first; see README.md.
+torch>=2.1
+ultralytics>=8.3

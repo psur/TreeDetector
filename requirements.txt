@@ -1,0 +1,8 @@
+# Dependencies shared by both model environments.
+numpy>=1.26,<3
+pandas>=2.1
+PyYAML>=6.0
+Pillow>=10.0
+opencv-python>=4.8
+matplotlib>=3.8
+scikit-learn>=1.3

@@ -1,0 +1,59 @@
+input:
+  datasets:
+    - id: "oliver_plot1_part1"
+      images_dir: "D:/TreeDetector-data/oliver/19_4_Plocha_1_part1"
+      annotations_dir: "D:/TreeDetector-data/oliver/19_4_Plocha_1_part1"
+    - id: "oliver_hotove_stromceky"
+      images_dir: "D:/TreeDetector-data/oliver/hotove-stromceky"
+      annotations_dir: "D:/TreeDetector-data/oliver/hotove-stromceky"
+    - id: "marek_2026_tiles_1024"
+      images_dir: "D:/TreeDetector-data/Marek/1.2.2026_tiles_1024"
+      annotations_dir: "D:/TreeDetector-data/Marek/1.2.2026_tiles_1024"
+dataset:
+  output_dir: "datasets/benchmark_v4"
+  train_fraction: 0.70
+  val_fraction: 0.15
+  test_fraction: 0.15
+  random_seed: 42
+  split_mode: "random"
+  rebuild_split: false
+  copy_mode: "copy"
+  exclude_images_with_labels: ["zmladenie"]
+  exclude_images_with_shape_types: ["circle"]
+classes:
+  0: "tree"
+  1: "TreeGroup"
+models:
+  yolo:
+    enabled: true
+    task: "segmentation"
+    weights: "yolo11m-seg.pt"
+  detectree2:
+    enabled: true
+    implementation: "Detectron2"
+    architecture: "Mask R-CNN"
+    backbone: "ResNet-50-FPN"
+    config: "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
+    weights: ""
+detectree2_training:
+  max_iterations: 5000
+  ims_per_batch: 2
+  base_lr: 0.00025
+  num_workers: 2
+  roi_batch_size_per_image: 128
+  checkpoint_period: 500
+  evaluation_period: 500
+training:
+  epochs: 100
+  imgsz: 640
+  batch: 8
+  patience: 20
+  workers: 4
+  seed: 42
+  pretrained: true
+  device: "auto"
+evaluation:
+  confidence_threshold: 0.25
+  iou_threshold: 0.50
+  save_visualizations: true
+  visualization_count: 20
