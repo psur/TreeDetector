@@ -13,6 +13,7 @@ htmlcov/
 
 # Local Python and Conda environments
 .venv/
+.venv-*/
 venv/
 env/
 ENV/

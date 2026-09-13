@@ -11,3 +11,9 @@ class BenchmarkModel(ABC):
     def predict(self):...
     @abstractmethod
     def evaluate(self):...
+    @abstractmethod
+    def benchmark_metadata(self):
+        """Return backend identity and training settings for result logging."""
+        ...
+    def parameter_count(self):
+        return None

@@ -16,4 +16,4 @@ def test_fingerprint_is_row_order_independent(tmp_path):
  a=tmp_path/"a.csv";b=tmp_path/"b.csv";pd.DataFrame(rows).to_csv(a,index=False);pd.DataFrame(reversed(rows)).to_csv(b,index=False)
  assert dataset_fingerprint(a)==dataset_fingerprint(b)
 
-def test_registry():assert model_names()==("yolo","detectree2")
+def test_registry():assert model_names()==("yolo",)

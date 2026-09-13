@@ -2,10 +2,11 @@
 import argparse,json,logging
 from pathlib import Path
 def build_parser():
+    from src.models.registry import model_names
     p=argparse.ArgumentParser(description="2D tree crown segmentation benchmark");p.add_argument("--config",default="config/config.yaml");p.add_argument("--verbose",action="store_true");sub=p.add_subparsers(dest="command",required=True);sub.add_parser("prepare",help="Validate, split, export, and summarize");sub.add_parser("info",help="Show runtime and dataset information")
     sub.add_parser("compare",help="Print benchmark results")
     for name in ("train","evaluate","benchmark","predict"):
-        q=sub.add_parser(name);q.add_argument("--model",choices=["yolo","detectree2","all"],default="yolo");q.add_argument("--experiment",help="Existing run directory, especially for evaluate/predict")
+        q=sub.add_parser(name);q.add_argument("--model",choices=model_names(),default="yolo");q.add_argument("--experiment",help="Existing run directory, especially for evaluate/predict")
         if name=="predict":q.add_argument("--source",help="Optional image path; omit to sample random fixed-test images")
     return p
 def main(argv=None):

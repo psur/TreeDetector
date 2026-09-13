@@ -9,6 +9,13 @@ class YoloModel(BenchmarkModel):
         self.cfg=cfg;self.spec=cfg["models"]["yolo"];self.experiment_dir=Path(experiment_dir) if experiment_dir else project_path(cfg,"runs")/f"yolo_seg_{datetime.now():%Y%m%d_%H%M%S_%f}";self.model=None;self.training_seconds=None;self.resume_checkpoint=None
     @property
     def name(self):return Path(self.spec["weights"]).stem
+    def benchmark_metadata(self):
+        return {"model_family": "YOLO", "implementation": "Ultralytics",
+                "architecture": "one-stage segmentation", "backbone": None,
+                "epochs": self.cfg["training"]["epochs"],
+                "image_size": self.cfg["training"]["imgsz"]}
+    def parameter_count(self):
+        return sum(p.numel() for p in self.model.model.parameters())
     def prepare(self,for_training=False):
         dataset_yaml=project_path(self.cfg,self.cfg["dataset"]["output_dir"])/"dataset.yaml"
         if not dataset_yaml.is_file():raise RuntimeError(f"Prepared dataset not found: {dataset_yaml}. Run 'python main.py prepare' successfully before training or evaluation")
