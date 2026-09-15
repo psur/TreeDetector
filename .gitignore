@@ -79,3 +79,6 @@ artifacts/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Downloaded pretrained model cache
+.cache/

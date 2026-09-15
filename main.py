@@ -5,6 +5,8 @@ def build_parser():
     from src.models.registry import model_names
     p=argparse.ArgumentParser(description="2D tree crown segmentation benchmark");p.add_argument("--config",default="config/config.yaml");p.add_argument("--verbose",action="store_true");sub=p.add_subparsers(dest="command",required=True);sub.add_parser("prepare",help="Validate, split, export, and summarize");sub.add_parser("info",help="Show runtime and dataset information")
     sub.add_parser("compare",help="Print benchmark results")
+    smoke = sub.add_parser("smoke", help="One Mask2Former training and validation batch only")
+    smoke.add_argument("--model", choices=["mask2former"], default="mask2former")
     for name in ("train","evaluate","benchmark","predict"):
         q=sub.add_parser(name);q.add_argument("--model",choices=model_names(),default="yolo");q.add_argument("--experiment",help="Existing run directory, especially for evaluate/predict")
         if name=="predict":q.add_argument("--source",help="Optional image path; omit to sample random fixed-test images")
@@ -23,6 +25,9 @@ def main(argv=None):
         elif args.command=="info":
             import pandas as pd
             manifest=project_path(cfg,cfg["dataset"]["output_dir"])/"dataset_manifest.csv";counts=pd.read_csv(manifest).split.value_counts().to_dict() if manifest.exists() else {};print(json.dumps(info|{"selected_model":cfg["models"]["yolo"]["weights"],"dataset_images":sum(counts.values()),"splits":counts},indent=2))
+        elif args.command=="smoke":
+            from src.models.registry import get_model
+            logging.info("Smoke experiment: %s", get_model(args.model, cfg).smoke_test())
         elif args.command=="compare":
             from src.benchmark.runner import compare
             compare(cfg)

@@ -16,7 +16,7 @@ class BackendCleanupTests(unittest.TestCase):
     def test_cli_rejects_unimplemented_backends(self):
         for action in ("train", "evaluate", "benchmark", "predict"):
             self.assertEqual(build_parser().parse_args([action, "--model", "yolo"]).model, "yolo")
-            for backend in ("detectree2", "all", "mask2former"):
+            for backend in ("detectree2", "all"):
                 with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as caught:
                     build_parser().parse_args([action, "--model", backend])
                 self.assertEqual(caught.exception.code, 2)

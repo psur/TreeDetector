@@ -28,6 +28,21 @@ models:
     enabled: true
     task: "segmentation"
     weights: "yolo11m-seg.pt"
+  mask2former:
+    enabled: true
+    model_name: "facebook/mask2former-swin-tiny-coco-instance"
+    revision: "22c4a2f15dc88149b8b8d9f4d42c54431fbd66f6"
+    image_size: 512
+    batch_size: 1
+    gradient_accumulation_steps: 4
+    learning_rate: 0.00005
+    weight_decay: 0.01
+    epochs: 30
+    patience: 7
+    max_grad_norm: 1.0
+    seed: 42
+    device: "cuda"
+    mixed_precision: false
 training:
   epochs: 100
   imgsz: 640

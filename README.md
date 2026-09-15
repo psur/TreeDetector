@@ -1,6 +1,6 @@
 # TreeDetector
 
-TreeDetector prepares a fixed UAV tree-crown dataset and benchmarks instance segmentation. YOLO11m-seg is completed and working. The Detectron2 / Mask R-CNN benchmark was abandoned because of legacy build/toolchain complexity. Mask2Former is the next planned comparison; it is not implemented or exposed by the CLI.
+TreeDetector prepares a fixed UAV tree-crown dataset and benchmarks instance segmentation. YOLO11m-seg is completed and working. The Detectron2 / Mask R-CNN benchmark was abandoned because of legacy build/toolchain complexity. A Hugging Face Mask2Former backend is implemented and has passed a GPU smoke test; its full benchmark has not run.
 
 ## Dataset and configuration
 
@@ -10,7 +10,7 @@ TreeDetector prepares a fixed UAV tree-crown dataset and benchmarks instance seg
 
 ## Environments and commands
 
-Use separate environments for YOLO and future Mask2Former work. The existing `.venv-yolo` remains unchanged. For a new YOLO environment install a compatible PyTorch build and `requirements-yolo.txt`; test dependencies are in `requirements-dev.txt`. Shared data dependencies are in `requirements.txt`.
+Use separate environments for YOLO and Mask2Former work. The existing `.venv-yolo` remains unchanged. For a new YOLO environment install a compatible PyTorch build and `requirements-yolo.txt`; test dependencies are in `requirements-dev.txt`. Shared data dependencies are in `requirements.txt`.
 
 ```powershell
 python main.py --help
@@ -27,8 +27,22 @@ Evaluate/predict write into their experiment directory. Use a separate copy when
 
 ## Architecture and results
 
-`src/dataset/` handles scanning, validation, splitting, and YOLO/COCO export. `src/models/` contains the backend contract, registry, and YOLO adapter. Only implemented backends are registered. Adapters provide result metadata; `src/benchmark/runner.py` writes experiment JSON and the shared benchmark CSV. No placeholder Mask2Former implementation or speculative hyperparameters are included.
+`src/dataset/` handles scanning, validation, splitting, and YOLO/COCO export. `src/models/` contains the backend contract, registry, and separate YOLO/Mask2Former adapters. Only implemented backends are registered. Adapters provide result metadata; `src/benchmark/runner.py` writes experiment JSON and the shared benchmark CSV. Mask2Former uses a COCO instance adapter and standard pycocotools evaluation.
 
-The completed run `runs/yolo_seg_20260912_193929_824528` and contour outputs `runs/predictions_mask_contours` are preserved outside Git. See [benchmark results](docs/benchmark_results.md), [Mask2Former plan](docs/model_notes.md), and [cleanup report](docs/cleanup_report.md).
+The completed run `runs/yolo_seg_20260912_193929_824528` and contour outputs `runs/predictions_mask_contours` are preserved outside Git. See [benchmark results](docs/benchmark_results.md), [Mask2Former usage](docs/model_notes.md), and [cleanup report](docs/cleanup_report.md).
 
-Dataset validation accepts YOLO TXT, LabelMe polygons, and polygon COCO JSON. Missing annotations and invalid geometry are reported; source COCO RLE decoding is not implemented. Existing exclusions and seed 42 remain unchanged. Random image splits can contain overlapping UAV views; preserve this benchmark split for comparison and document that limitation.
+Dataset validation accepts YOLO TXT, LabelMe polygons, and polygon COCO JSON. Missing annotations and invalid geometry are reported; the original source-preparation path supports polygons, while the new Mask2Former adapter also decodes COCO RLE. Existing exclusions and seed 42 remain unchanged. Random image splits can contain overlapping UAV views; preserve this benchmark split for comparison and document that limitation.
+
+
+## Mask2Former
+
+Activate the existing `tree_mask2former` environment. The conservative initial run uses COCO-pretrained Swin-Tiny, 512-pixel square inputs, batch 1, accumulation 4, AdamW at 5e-5, up to 30 epochs, and patience 7 selected by validation mask AP. Float32 is used on the GTX 1080 Ti. The smoke test peaked at 2.11 GiB allocated / 2.51 GiB reserved GPU memory with 56 instances.
+
+```powershell
+conda activate tree_mask2former
+python main.py --config config/config.yaml smoke --model mask2former
+# First full benchmark (not executed during implementation):
+python main.py --config config/config.yaml benchmark --model mask2former
+```
+
+See [usage, resume and metric conventions](docs/model_notes.md) and the [smoke report](docs/mask2former_smoke_report.md). Dependencies are documented in `requirements-mask2former.txt`; the checkpoint revision is pinned in both configs and its download cache is ignored. Do not run `prepare` for this existing benchmark.
