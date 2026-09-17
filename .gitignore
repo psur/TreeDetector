@@ -82,3 +82,10 @@ Desktop.ini
 
 # Downloaded pretrained model cache
 .cache/
+# Reproducible staging and lightweight v5 metadata
+data_staging/**
+!datasets/benchmark_v5/
+datasets/benchmark_v5/**
+!datasets/benchmark_v5/dataset_manifest.csv
+!datasets/benchmark_v5/dataset_summary.json
+!datasets/benchmark_v5/validation.json

@@ -1,0 +1,8 @@
+﻿# All descendants are discovered on each audit. Raw data is strictly read-only.
+raw_root: D:/temp/Dropbox/projects/NAZV2026/Anotacie/hotove_anotacie
+benchmark_v5_require_validated_decisions: true
+exclude_labels: [zmladenie]
+exclude_shape_types: [circle]
+
+# Final policy: no retained or repaired self-intersections.
+benchmark_v5_strict_geometry: true

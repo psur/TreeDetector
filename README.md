@@ -46,3 +46,5 @@ python main.py --config config/config.yaml benchmark --model mask2former
 ```
 
 See [usage, resume and metric conventions](docs/model_notes.md) and the [smoke report](docs/mask2former_smoke_report.md). Dependencies are documented in `requirements-mask2former.txt`; the checkpoint revision is pinned in both configs and its download cache is ignored. Do not run `prepare` for this existing benchmark.
+
+Dataset preparation: see [the reproducible v5 workflow](docs/dataset_preparation.md). Benchmark v4 remains frozen; v5 generation stops on unresolved annotation conflicts.

@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TreeDetector · Human review</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui;background:#111820;color:#e8eef4}body{margin:0}header{padding:20px 28px;background:#18232f;border-bottom:1px solid #344454}h1{font-size:22px;margin:0 0 10px}#progress{color:#afc7d9;display:flex;gap:22px;flex-wrap:wrap}main{max-width:1500px;margin:auto;padding:20px}button,select,input,textarea{font:inherit;color:inherit;background:#213243;border:1px solid #526b81;border-radius:6px;padding:10px}button{cursor:pointer}button:hover{background:#34516c}button:disabled{opacity:.4;cursor:default}nav,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.actions button{font-weight:650;background:#245b52}.actions button:last-child{background:#653940}.badge{padding:5px 10px;border-radius:6px;background:#665521}.badge.decided{background:#235d46}.badge.invalid{background:#793b3b}#caseid{font-family:monospace;font-size:20px}#message{min-height:24px;color:#9ce4b3;white-space:pre-wrap}#errors{color:#ffb0a6;white-space:pre-wrap}#metadata{display:grid;grid-template-columns:1fr 1fr;gap:16px}article{padding:14px;background:#1a2632;border-radius:8px;overflow-wrap:anywhere}article h3{margin:0 0 8px}.path{font:12px monospace;color:#abc0d0;white-space:pre-wrap}#images{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}figure{margin:0;padding:10px;background:#1a2632;border-radius:8px}figcaption{padding:5px 0 10px;color:#c8dae8}figure img{width:100%;max-height:680px;object-fit:contain;cursor:zoom-in}label{display:block;margin:10px 0}textarea{width:calc(100% - 24px);height:55px}input{width:calc(100% - 24px)}small{color:#afc7d9}#complete{padding:20px;border:1px solid #4caa77;margin:12px 0}code{overflow-wrap:anywhere}dialog{max-width:95vw;max-height:95vh;padding:12px;background:#111820;border:1px solid #526b81}dialog img{max-width:90vw;max-height:83vh;object-fit:contain}dialog::backdrop{background:#000b}.muted{color:#adbdcc}@media(max-width:800px){#images,#metadata{grid-template-columns:1fr}main{padding:12px}header{padding:16px}}
+</style>
+<header><h1>TreeDetector · benchmark_v5 review</h1><div id="progress">Loading saved decisions…</div></header>
+<main>
+<div id="message" role="status" aria-live="polite"></div>
+<div id="complete" hidden><strong>REVIEW COMPLETE</strong><p>All items pass decision validation. No dataset has been generated.</p><code id="command"></code></div>
+<nav><button id="prev">← Previous</button><button id="next">Next →</button><button id="nextPending">Next unresolved</button><button id="firstPending">First unresolved</button><button id="reload">Reload from disk</button><select id="jump" aria-label="Jump to review item"></select></nav>
+<section id="case" hidden><div><span id="caseid"></span> <span id="badge" class="badge"></span> <span id="position" class="muted"></span></div>
+<p id="kind"></p><div id="errors" role="alert"></div><p id="existing"></p>
+<div id="metadata"></div>
+<label>Notes <small>Saved with your next decision click</small><textarea id="notes" placeholder="Optional notes"></textarea></label>
+<label id="manualLabel">Staged fixed annotation path <small>Required to complete MANUAL FIX; you can record the request now and supply the copy later.</small><input id="manual" placeholder="D:\TreeDetector\data_staging\benchmark_v5\fixed.json"></label>
+<div class="actions" id="actions"></div><small id="shortcuts"></small><p class="muted">A decision click saves directly to the CSV. Click an image to enlarge. No geometry repairs or dataset builds run here.</p>
+<div id="images"></div></section>
+</main><dialog id="zoom"><button id="closeZoom">Close (Esc)</button><p><img id="zoomImage" alt="Enlarged review overlay"></p></dialog>
+<script>
+const token='__TOKEN__';let state=null,index=0,busy=false,dirty=false;
+const $=id=>document.getElementById(id);
+function text(tag,value,cls){const el=document.createElement(tag);el.textContent=value;if(cls)el.className=cls;return el;}
+function unresolved(i){return state.items[i].decision_status!=='COMPLETE';}
+function firstPending(){return state.items.findIndex(x=>x.decision_status!=='COMPLETE');}
+function nextPending(start){for(let n=1;n<=state.items.length;n++){const i=(start+n)%state.items.length;if(unresolved(i))return i;}return -1;}
+function canNavigate(){return !dirty||confirm('Notes/path edits have not been saved. Leave this item without saving those edits?');}
+function go(i){if(busy||i<0||i>=state.items.length||!canNavigate())return;index=i;render();}
+function controls(){document.querySelectorAll('button').forEach(b=>b.disabled=busy);$('jump').disabled=busy;$('notes').disabled=busy;$('manual').disabled=busy;if(!busy&&state){$('prev').disabled=index===0;$('next').disabled=index===state.items.length-1;}}
+function render(){
+ const r=state.items[index],s=state.summary;dirty=false;
+ $('progress').replaceChildren(...[['TOTAL',s.total_review_items],['COMPLETE',s.complete],['PENDING',s.pending],['INVALID',s.invalid],['CONFLICTS',s.conflicts_complete+' / '+state.items.filter(r=>r.issue_type==='ANNOTATION_CONFLICT').length],['GEOMETRY',s.geometry_complete+' / '+state.items.filter(r=>r.issue_type==='GEOMETRY').length]].map(([k,v])=>text('span',k+': '+v)));
+ $('complete').hidden=s.complete!==s.total_review_items||s.invalid>0;$('command').textContent=state.validator_command;
+ $('case').hidden=false;$('caseid').textContent=r.review_id;$('position').textContent=(index+1)+' / '+state.items.length;
+ const status=r.decision_status==='COMPLETE'?'DECIDED':r.decision_status;$('badge').textContent=status;$('badge').className='badge '+status.toLowerCase();
+ $('kind').textContent=r.issue_type+(r.self_intersection_severity?' · Severity: '+r.self_intersection_severity:'');
+ $('existing').textContent=r.human_decision?'Current saved decision: '+r.human_decision+' — clicking another decision replaces it.':'No saved decision yet.';
+ $('errors').textContent=(r.errors||[]).join('\n');$('notes').value=r.notes||'';$('manual').value=r.selected_annotation||'';
+ const conflict=r.issue_type==='ANNOTATION_CONFLICT';$('manualLabel').hidden=conflict;$('metadata').replaceChildren();
+ for(const side of (conflict?['a','b']:['a'])){const a=document.createElement('article');a.append(text('h3',conflict?'Annotation '+side.toUpperCase():'Source annotation'));a.append(text('p',(r['annotator_'+side]||'')+' · Tree: '+r['tree_count_'+side]+' · TreeGroup: '+r['treegroup_count_'+side]));a.append(text('p',r['annotation_'+side],'path'));if(!conflict){try{a.append(text('p','Polygon index: '+JSON.parse(r.geometry_issue).shape_index+' (1-based)'));}catch{}}a.append(text('p','Source image: '+r.image_path,'path'));$('metadata').append(a);}
+ const choices=conflict?[['KEEP_A','KEEP A · A'],['KEEP_B','KEEP B · B'],['EXCLUDE','EXCLUDE · X']]:[['KEEP_AS_IS','KEEP AS IS · K'],['AUTO_FIX_APPROVED','AUTO FIX APPROVED · F'],['MANUAL_FIX','MANUAL FIX · M'],['EXCLUDE','EXCLUDE · X']];
+ $('actions').replaceChildren();for(const [value,label] of choices){const b=text('button',label);b.onclick=()=>save(value);$('actions').append(b);}
+ $('shortcuts').textContent=conflict?'Keyboard: A = keep A, B = keep B, X = exclude.':'Keyboard: K = keep as is, F = approve auto fix, M = manual fix, X = exclude. '+(r.auto_fix_supported==='NO'?'Automatic repair is unsupported here: '+r.auto_fix_support_reason:'');
+ $('images').replaceChildren();let polygonPrefix='';if(!conflict){try{polygonPrefix='A_polygon_'+JSON.parse(r.geometry_issue).shape_index+'_';}catch{}}const assets=r.assets.filter(a=>conflict?['original','annotation_A','annotation_B','combined'].includes(a.name):a.name==='original'||a.name.startsWith(polygonPrefix)&& (a.name.includes('_highlight')||a.name.endsWith('_zoom')));
+ const rank=a=>a.name==='original'?0:a.name==='annotation_A'?1:a.name==='annotation_B'?2:a.name==='combined'?3:a.name.includes('_highlight')?1:2;assets.sort((a,b)=>rank(a)-rank(b));
+ for(const a of assets){const f=document.createElement('figure'),img=document.createElement('img');img.src=a.url;img.alt=a.name;img.loading='lazy';img.onclick=()=>{$('zoomImage').src=a.url;$('zoomImage').alt=a.name;$('zoom').showModal();};f.append(text('figcaption',a.name.replaceAll('_',' ')),img);$('images').append(f);}
+ $('jump').replaceChildren(...state.items.map((r,i)=>{const o=text('option',(i+1)+'. '+r.review_id+' · '+(r.human_decision||'PENDING'));o.value=i;return o;}));$('jump').value=index;controls();
+}
+async function load(resume=false){if(busy)return;busy=true;controls();try{const response=await fetch('/api/state');const data=await response.json();if(!response.ok)throw Error(data.error||'Load failed');state=data;if(resume)index=Math.max(0,firstPending());render();}catch(e){$('message').textContent=e.message;}finally{busy=false;controls();}}
+async function save(decision){if(busy)return;const r=state.items[index];busy=true;controls();$('message').textContent='Saving '+decision+'…';try{
+ const response=await fetch('/api/decision',{method:'POST',headers:{'Content-Type':'application/json','X-Review-Token':token},body:JSON.stringify({review_id:r.review_id,decision,revision:state.revision,notes:$('notes').value,selected_annotation:$('manual').value})});const data=await response.json();if(!response.ok)throw Error(data.error||'Save failed');dirty=false;$('message').textContent=data.message;
+ if(data.state){state=data.state;const current=state.items.find(x=>x.review_id===r.review_id);if(current.decision_status==='INVALID')$('message').textContent+=' ? INVALID: '+current.errors.join('; ');const next=nextPending(index);if(next>=0)index=next;render();}
+ }catch(e){$('message').textContent='Not saved: '+e.message;}finally{busy=false;controls();}}
+$('prev').onclick=()=>go(index-1);$('next').onclick=()=>go(index+1);$('firstPending').onclick=()=>go(firstPending());$('nextPending').onclick=()=>go(nextPending(index));$('jump').onchange=e=>go(Number(e.target.value));$('reload').onclick=()=>{if(canNavigate())load(false);};$('notes').oninput=$('manual').oninput=()=>dirty=true;$('closeZoom').onclick=()=>$('zoom').close();
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+document.addEventListener('keydown',e=>{if(!state||busy||e.repeat||e.ctrlKey||e.metaKey||e.altKey||$('zoom').open||['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;const map=state.items[index].issue_type==='ANNOTATION_CONFLICT'?{a:'KEEP_A',b:'KEEP_B',x:'EXCLUDE'}:{k:'KEEP_AS_IS',f:'AUTO_FIX_APPROVED',m:'MANUAL_FIX',x:'EXCLUDE'};const decision=map[e.key.toLowerCase()];if(decision){e.preventDefault();save(decision);}});
+load(true);
+</script></html>

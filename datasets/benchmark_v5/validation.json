@@ -1,0 +1,9 @@
+{
+  "valid": true,
+  "images": 262,
+  "instances": 3802,
+  "spatial_leakage_status": "PARENT_FILENAME_GROUPED; FLIGHT/SPATIAL METADATA UNVERIFIED",
+  "content_leakage": false,
+  "decoded_pixel_duplicates": false,
+  "parent_image_group_leakage": false
+}

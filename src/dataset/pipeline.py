@@ -35,6 +35,8 @@ def _label(o,w,h,seg):
     if seg and o.polygon:return f"{o.class_id} "+" ".join(f"{v:.8f}" for p in o.polygon for v in (p[0]/w,p[1]/h))
     x1,y1,x2,y2=o.bounding_box; return f"{o.class_id} {(x1+x2)/(2*w):.8f} {(y1+y2)/(2*h):.8f} {(x2-x1)/w:.8f} {(y2-y1)/h:.8f}"
 def prepare_dataset(cfg):
+    if project_path(cfg,cfg["dataset"]["output_dir"]).resolve().name == "benchmark_v4":
+        raise ValueError("benchmark_v4 is frozen. Use prepare --dataset benchmark_v5")
     out=project_path(cfg,cfg["dataset"]["output_dir"]); results=project_path(cfg,"results"); results.mkdir(parents=True,exist_ok=True)
     sources=cfg["input"].get("datasets")
     if not sources:sources=[{"id":"default","images_dir":cfg["input"]["images_dir"],"annotations_dir":cfg["input"]["annotations_dir"]}]

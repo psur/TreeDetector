@@ -1,0 +1,20 @@
+{
+  "decision_file": "D:\\TreeDetector\\config\\benchmark_v5_decisions.csv",
+  "decision_file_sha256": "0ad51183d8d6120b1acdca0aa3d95d0d2ef5f92afc216d7825d192e4f3216a80",
+  "review_catalog_sha256": "5fe3a4992d879b35b7605fba7c31b0853a60daf3971fe430144eb05d07173cd8",
+  "source_snapshot_sha256": "8637ea22901e6c865879afdf60a5072b1cef8b853dbafbd5854b41620db4f34d",
+  "generator_sha256": "17efd72778b3a1918f3ff9dee53f1f257a216d6f09a1d1f0c5122767c110298c",
+  "decision_validator_sha256": "7500555e327d520ce224eb4e93f1bb0c05fea1104393b0699329f6623c8e1cdc",
+  "strict_geometry_policy": true,
+  "random_seed": 42,
+  "split_method": "global parent-frame filename groups; deterministic greedy 70/15/15 targets",
+  "images_per_split": {
+    "train": 183,
+    "val": 39,
+    "test": 40
+  },
+  "included_image_count": 262,
+  "explicit_self_intersection_exceptions": {},
+  "spatial_leakage_status": "PARENT_FILENAME_GROUPED; FLIGHT/SPATIAL METADATA UNVERIFIED",
+  "dataset_fingerprint": "eb8c714787175ffe52ababcb2750fc159d0ac622996bb852cbc275e443e666bc"
+}
