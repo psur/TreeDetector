@@ -74,7 +74,15 @@ def validate_dataset(root, expected_counts=None):
         raise ValueError("Duplicate manifest image identity")
     if set(manifest.split) != {"train", "val", "test"}:
         raise ValueError("Unexpected manifest splits")
-    expected_counts = expected_counts or {"train": 115, "val": 25, "test": 25}
+    # The frozen manifest defines membership for this dataset version. Never
+    # assume the sizes of a previous benchmark (v4 was 115/25/25).
+    manifest_counts = {split: int((manifest.split == split).sum())
+                       for split in ("train", "val", "test")}
+    if expected_counts is None:
+        expected_counts = manifest_counts
+    elif expected_counts != manifest_counts:
+        raise ValueError(f"Expected split counts differ from manifest: "
+                         f"expected={expected_counts}, manifest={manifest_counts}")
     seen_ids, seen_pixels = set(), {}
     report = {"dataset_fingerprint": fingerprint, "splits": {}}
     for split in ("train", "val", "test"):
@@ -82,7 +90,12 @@ def validate_dataset(root, expected_counts=None):
         rows = manifest[manifest.split == split].set_index("image_id")
         ids = [i["canonical_image_id"] for i in dataset.images]
         if len(dataset) != expected_counts[split] or set(ids) != set(rows.index) or len(ids) != len(set(ids)):
-            raise ValueError(f"COCO/manifest count or identity mismatch: {split}")
+            missing = sorted(set(rows.index) - set(ids))
+            extra = sorted(set(ids) - set(rows.index))
+            raise ValueError(f"COCO/manifest count or identity mismatch: {split}; "
+                             f"manifest={len(rows)}, COCO={len(dataset)}, "
+                             f"missing={missing}, extra={extra}, "
+                             f"duplicate canonical IDs={len(ids)-len(set(ids))}")
         if seen_ids.intersection(ids):
             raise ValueError("Cross-split canonical ID leakage")
         seen_ids.update(ids)

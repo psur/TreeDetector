@@ -43,11 +43,14 @@ def evaluate_coco(annotation_path, predictions, image_ids=None):
     def average(values):
         valid = values[values >= 0]
         return float(valid.mean()) if valid.size else None
+    recall = evaluator.eval["recall"]  # IoU, category, area, maxDets
     per_class = {}
     for index, category in enumerate(evaluator.params.catIds):
         values = precision[:, :, index, 0, -1]
         per_class[truth.cats[category]["name"]] = {
-            "map50_mask": average(values[0]), "map50_95_mask": average(values)}
+            "map50_mask": average(values[0]), "map50_95_mask": average(values),
+            "map75_mask": average(values[5]),
+            "coco_ar100_mask": average(recall[:, index, 0, -1])}
     return {"precision_mask": None, "recall_mask": None,
             "map50_mask": average(precision[0, :, :, 0, -1]),
             "map75_mask": average(precision[5, :, :, 0, -1]),

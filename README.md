@@ -27,6 +27,8 @@ Evaluate/predict write into their experiment directory. Use a separate copy when
 
 ## Architecture and results
 
+Final benchmark_v5 held-out test comparison: [YOLO11m-seg and Mask2Former results](docs/benchmark_v5_results.md).
+
 `src/dataset/` handles scanning, validation, splitting, and YOLO/COCO export. `src/models/` contains the backend contract, registry, and separate YOLO/Mask2Former adapters. Only implemented backends are registered. Adapters provide result metadata; `src/benchmark/runner.py` writes experiment JSON and the shared benchmark CSV. Mask2Former uses a COCO instance adapter and standard pycocotools evaluation.
 
 The completed run `runs/yolo_seg_20260912_193929_824528` and contour outputs `runs/predictions_mask_contours` are preserved outside Git. See [benchmark results](docs/benchmark_results.md), [Mask2Former usage](docs/model_notes.md), and [cleanup report](docs/cleanup_report.md).
